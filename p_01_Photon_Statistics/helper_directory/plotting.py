@@ -3,6 +3,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from pathlib import Path
 import math
+from scipy.stats import poisson
 
 # nos piden obtener el histograma asociado a cada dataframe,
 # para luego normalizarlo y obtener la densidad
@@ -58,10 +59,55 @@ import math
 
 # pero demos el histograma con barras de error
 
-def fdp_histograma(df, *, ax=None, title=None, save_path=None, error_bars=True):
+# def fdp_histograma(df, *, ax=None, title=None, save_path=None, error_bars=True):
+#     s = pd.to_numeric(df.iloc[:, 0], errors="coerce").dropna().astype(int)
+#
+#     # probabilities p_k (this is your empirical PMF)
+#     counts = s.value_counts().sort_index()     # n_k
+#     N = int(s.size)
+#     fdp = (counts / N)                         # p_k
+#
+#     if ax is None:
+#         fig, ax = plt.subplots()
+#     else:
+#         fig = ax.figure
+#
+#     # plot PMF as bars
+#     x = fdp.index.to_numpy()
+#     y = fdp.to_numpy()
+#     ax.bar(x, y, width=1.0, align="center", edgecolor="black", alpha=0.7)
+#
+#     # error bars on p_k
+#     if error_bars:
+#         yerr = np.sqrt(counts.to_numpy()) / N   # sqrt(n_k)/N  # una aproximación a la desviación de la probabilidad en el valor "k", no?
+#         ax.errorbar(x, y, yerr=yerr, fmt="none", capsize=3)
+#
+#     ax.set_xlabel("número de fotones")
+#     ax.set_ylabel("probabilidad")
+#     if title:
+#         ax.set_title(title)
+#
+#     if save_path is not None:
+#         save_path = Path(save_path)
+#         save_path.parent.mkdir(parents=True, exist_ok=True)
+#         fig.savefig(save_path, dpi=300, bbox_inches="tight")
+#
+#     return fdp
+
+# mejor demos el histograma con barras de error y la posibilidad de sobreponer la densidad teórica con el promedio dado
+
+def fdp_histograma(
+    df, *, ax=None, title=None, save_path=None,
+    error_bars=True,
+    overlay_poisson=False,
+    overlay_connect=True,
+    hist_color="darkmagenta",
+    overlay_color="tab:orange",
+    errorbar_color="black",
+):
     s = pd.to_numeric(df.iloc[:, 0], errors="coerce").dropna().astype(int)
 
-    # probabilities p_k (this is your empirical PMF)
+    # empirical PMF: p_k
     counts = s.value_counts().sort_index()     # n_k
     N = int(s.size)
     fdp = (counts / N)                         # p_k
@@ -74,12 +120,31 @@ def fdp_histograma(df, *, ax=None, title=None, save_path=None, error_bars=True):
     # plot PMF as bars
     x = fdp.index.to_numpy()
     y = fdp.to_numpy()
-    ax.bar(x, y, width=1.0, align="center", edgecolor="black", alpha=0.7)
+    ax.bar(x, y, width=1.0, align="center", edgecolor="black",
+       color=hist_color, alpha=0.7)
 
     # error bars on p_k
     if error_bars:
         yerr = np.sqrt(counts.to_numpy()) / N   # sqrt(n_k)/N
-        ax.errorbar(x, y, yerr=yerr, fmt="none", capsize=3)
+        ax.errorbar(x, y, yerr=yerr, fmt="none", capsize=3, color=errorbar_color)
+
+    # --- NEW: Poisson overlay using sample mean ---
+    if overlay_poisson:
+        mu = float(s.mean())  # sample mean
+        k = np.arange(0, int(s.max()) + 1)  # nice full discrete range
+        pk = poisson.pmf(k, mu=mu)
+        linestyle = "-" if overlay_connect else "none"
+
+        ax.plot(
+            k, pk,
+            marker="o",
+            linestyle=linestyle,
+            linewidth=1.2,
+            color=overlay_color,
+            label=f"Poisson(μ={mu:.3g})",
+        )
+
+        ax.legend()
 
     ax.set_xlabel("número de fotones")
     ax.set_ylabel("probabilidad")

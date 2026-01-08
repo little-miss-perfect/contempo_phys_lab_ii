@@ -13,7 +13,8 @@ from helper_directory.plotting import fdp_histograma, best_grid
 
 # y aquí tenemos que decidir si usamos la medición del día uno o del día dos.
 
-def main_func(path_0_day, t_0_day, pruebas, paths_day, escala="micro"):
+def main_func(path_0_day, t_0_day, pruebas, paths_day, escala="micro",
+                hist_color="steelblue", overlay_color="darkorange", errorbar_color="0.2"):
     # choose the day
     df_0_original = pd.read_csv(path_0_day, encoding='utf-8')
     df_0_copia = df_0_original.copy(deep=True)
@@ -41,12 +42,32 @@ def main_func(path_0_day, t_0_day, pruebas, paths_day, escala="micro"):
     # print(copia['df_1'].head())  # un sanity check
 
     # donde los demás valores esperados fueron
-    for i in range(1, len(paths_day) + 1):  # ojo con los índices aquí y el "range"
+    for i in range(1, len(paths_day) + 1):
         name = f"df_{i}"
-        print(f"'{name}' con valor esperado:\n{copia[name].mean()}\n")
+        x = copia[name].iloc[:, 0]  # first (and only) column as a Series
+
+        mu = x.mean()  # pandas mean
+        var = x.var(ddof=1)  # pandas sample variance (ddof=1)
+
+        print(f"'{name}' con valor esperado y varianza (respectivamente):\n"
+              f"{mu:.6f}, {var:.6f}\n")
 
     # para luego hacer los histogramas, tenemos dos opciones.
     names = list(copia.keys())
+
+    overlay = input("sobreponer densidad teórica de Poisson con la media muestral? (y/n): ").strip().lower()
+    while overlay not in ("y", "n"):
+        overlay = input("opción inválida. escribe 'y' o 'n': ").strip().lower()
+
+    overlay_poisson = (overlay == "y")
+
+    if overlay_poisson:
+        connect = input("conectar los puntos de la densidad de Poisson mediante una línea? (y/n): ").strip().lower()
+        while connect not in ("y", "n"):
+            connect = input("opción inválida. escribe 'y' o 'n': ").strip().lower()
+        overlay_connect = (connect == "y")
+    else:
+        overlay_connect = False  # doesn't matter, but keeps variable defined
 
     option = input("selecciona '1' para un archivo de los histogramas y '2' para archivos separados de los histogramas: ")
 
@@ -61,7 +82,16 @@ def main_func(path_0_day, t_0_day, pruebas, paths_day, escala="micro"):
             axes = np.atleast_1d(axes)
 
             for ax, name in zip(axes.ravel(), names):
-                fdp_histograma(copia[name], ax=ax, title=name)  # no save_path here
+                fdp_histograma(
+                    copia[name],
+                    ax=ax,
+                    title=name,
+                    overlay_poisson=overlay_poisson,
+                    overlay_connect=overlay_connect,  # ✅ NEW
+                    hist_color=hist_color,
+                    overlay_color=overlay_color,
+                    errorbar_color=errorbar_color,
+                )
 
             fig.savefig("histograms/all_histograms.svg", bbox_inches="tight")
 
@@ -77,18 +107,33 @@ def main_func(path_0_day, t_0_day, pruebas, paths_day, escala="micro"):
 
             # (2) todos los histogramas en archivos separados
             for name in names:
-                fdp_histograma(copia[name], title=name, save_path=f"histograms/{name}.svg")
+                fdp_histograma(
+                    copia[name],
+                    title=name,
+                    save_path=f"histograms/{name}.svg",
+                    overlay_poisson=overlay_poisson,
+                    overlay_connect=overlay_connect,  # ✅ NEW
+                    hist_color=hist_color,
+                    overlay_color=overlay_color,
+                    errorbar_color=errorbar_color,
+                )
+
             plt.show()
 
             break
 
         else:
-            print("opción no valida")
+            print("opción inválida")
             option = input(
                 "selecciona '1' para un archivo de los histogramas y '2' para archivos separados de los histogramas: ")  # y así seguimos preguntando
 
     # los valores esperados que probamos fueron los siguientes
     # [1, 5, 10, 100]
 
-# y a ver si funcionó
+# y a ver si funcionó:
+
+# day_1
 main_func(path_0_day_1, t_0_day_1, pruebas_day_1, paths_day_1)
+
+# day_2
+main_func(path_0_day_2, t_0_day_2, pruebas_day_2, paths_day_2)
