@@ -13,35 +13,23 @@ t_0_day_2 = 1E-6
 # muestras para el reporte:
 
 
-# la siguiente lista son los promedios con los que trabajaremos
-
-# [e_v, 1, 5, 10, 100]
-# sin contar el primer elemento, que fue nuestra referencia para "la regla de tres". es decir, tendremos listas como
-# day_1
-pruebas_day_1 = [0.96, 4.86, 10.35, 100.465]
-# day_2
-pruebas_day_2 = [1.03, 5.365, 10.66, 104.41, 110.195]
-# y recuerda que para ambos días, estas listas las obtenemos
-# del segundo loop de prints que hace nuestra función grandota en "main.py". tons en este archivo no las calculamos. ojo (eso está mal del "main.py". no las deberíamos de importar de aquí, sino trabajar con ellas desde la función en "main.py")
-
-
 # íbamos a definirlas de uno en uno, pero mejor tomemos una lista de los paths
 
 # día 1
 paths_day_1 = [ "samples/day_1/equipo_3_n1/Cuentas.csv",          # 'df_1': np.float64(1.04)
-          "samples/day_1/equipo_3_n5/Cuentas.csv",          # 'df_2': np.float64(4.71)
-          "samples/day_1/equipo_3_n10/Cuentas.csv",         # 'df_3': np.float64(4.925)
-          "samples/day_1/equipo_3_n100/Cuentas.csv",        # 'df_4': np.float64(5.095)
+                "samples/day_1/equipo_3_n5/Cuentas.csv",          # 'df_2': np.float64(4.71)
+                "samples/day_1/equipo_3_n10/Cuentas.csv",         # 'df_3': np.float64(4.925)
+                "samples/day_1/equipo_3_n100/Cuentas.csv",        # 'df_4': np.float64(5.095)
               ]  # los promedios que se muestran a la derecha de cada path, ya los obtuvimos en "main.py"
 
 # print(len(paths))  # es "4" porque no consideramos la medida usada para "e_v"
 
 # día 2
 paths_day_2 = [ "samples/day_2/01_1micros/Cuentas.csv",          # 'df_1': np.float64(1.04)
-          "samples/day_2/02_5micros/Cuentas.csv",          # 'df_2': np.float64(4.71)
-          "samples/day_2/03_10.6micros/Cuentas.csv",         # 'df_3': np.float64(4.925)
-          "samples/day_2/04_100micros/Cuentas.csv",        # 'df_4': np.float64(5.095)
-          "samples/day_2/05_106micros/Cuentas.csv",
+                "samples/day_2/02_5micros/Cuentas.csv",          # 'df_2': np.float64(4.71)
+                "samples/day_2/03_10.6micros/Cuentas.csv",       # 'df_3': np.float64(4.925)
+                "samples/day_2/04_100micros/Cuentas.csv",        # 'df_4': np.float64(5.095)
+                "samples/day_2/05_106micros/Cuentas.csv",
               ]
 
 # y para "la regla de tres":
